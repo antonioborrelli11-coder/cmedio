@@ -12,39 +12,32 @@ jobs:
     name: Build and analyze
     runs-on: ubuntu-latest
 
-    env:
-      BUILD_WRAPPER_OUT_DIR: build_wrapper_output_directory
-
     steps:
-      # 1️⃣ Checkout code
+      # 1️⃣ Checkout source
       - name: Checkout source
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # 2️⃣ Install dependencies (gcc, make, unzip, wget)
+      # 2️⃣ Install dependencies
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential unzip wget
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake
 
-      # 3️⃣ Download Build Wrapper from SonarSource
-      - name: Download Build Wrapper
+      # 3️⃣ Compile project and generate compile_commands.json
+      - name: Build C project
         run: |
-          wget https://binaries.sonarsource.com/Distribution/build-wrapper/build-wrapper-linux-x86.zip
-          unzip build-wrapper-linux-x86.zip
-          chmod +x build-wrapper-linux-x86/build-wrapper-linux-x86-64
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+          make -j
 
-      # 4️⃣ Run Build Wrapper + compile C project
-      - name: Run Build Wrapper
-        run: |
-          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} make clean all
-
-      # 5️⃣ Run SonarCloud analysis
+      # 4️⃣ Run SonarCloud analysis
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
           args: >
-            -Dsonar.projectKey=cmedio
-            -Dsonar.organization=antonioborrelli
-            -Dsonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
+            -Dsonar.projectKey=antonioborrelli11-coder_cmedio
+            -Dsonar.organization=antonioborrelli11-coder
+            -Dsonar.cfamily.compile-commands=build/compile_commands.json
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
