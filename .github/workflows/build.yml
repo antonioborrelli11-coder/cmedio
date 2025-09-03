@@ -19,7 +19,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # per analisi completa
+          fetch-depth: 0
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential
@@ -35,8 +35,8 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v2
         with:
           args: >
-            -Dsonar.projectKey=<PROJECT_KEY>
-            -Dsonar.organization=<ORG_KEY>
+            -Dsonar.projectKey=antonioborrelli11-coder_cmedio
+            -Dsonar.organization=antonioborrelli11-coder
             -Dsonar.cfamily.compile-commands=${{ env.BUILD_WRAPPER_OUT_DIR }}/compile_commands.json
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
